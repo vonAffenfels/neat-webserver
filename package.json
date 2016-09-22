@@ -6,6 +6,10 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nexum/neat-webserver.git"
+    },
     "author": "Dominik Kienzler <d.kienzler@dominik-kienzler.de>",
     "license": "ISC",
     "dependencies": {
@@ -23,6 +27,6 @@
     "peerDependencies": {
         "ape-status": "^1.1.2",
         "bluebird": "^3.4.6",
-        "neat-base": "~1.x.x"
+        "neat-base": "^1.x.x"
     }
 }
