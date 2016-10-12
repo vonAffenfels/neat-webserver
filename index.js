@@ -287,7 +287,7 @@ module.exports = class Webserver extends Module {
 
             apeStatus.info("port", this.config.port);
             this.httpServer = this.webserver.listen(this.config.port, () => {
-                this.log.debug("Webserver listening on " + this.config.port);
+                this.log.info("Webserver listening on " + this.config.port);
                 this.listening = true;
                 resolve(this);
             });
