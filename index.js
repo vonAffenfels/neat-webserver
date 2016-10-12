@@ -18,6 +18,7 @@ module.exports = class Webserver extends Module {
 
     static defaultConfig() {
         return {
+            maxBodySize: '10mb',
             session: {
                 name: "neat",
                 secret: "neat-secret",
@@ -67,9 +68,12 @@ module.exports = class Webserver extends Module {
             this.webserver.use(compression());
             this.webserver.use(responseTime());
             this.webserver.use(bodyParser.urlencoded({
-                extended: false
+                extended: false,
+                limit: this.config.maxBodySize
             }));
-            this.webserver.use(bodyParser.json());
+            this.webserver.use(bodyParser.json({
+                limit: this.config.maxBodySize
+            }));
             this.webserver.use(methodOverride());
             this.webserver.use(cookieParser(this.config.cookieParser.secret));
             if (this.config.session.enabled) {
@@ -115,11 +119,6 @@ module.exports = class Webserver extends Module {
                     switch (typeof err) {
                         case "object":
 
-                            if (err instanceof Error) {
-                                res.status(500);
-                                return res.end("<pre>" + err.toString() + ": <br> " + err.stack);
-                            }
-
                             // mongoose style error
                             if (err.name) {
                                 if (err.name === "ValidationError") {
@@ -133,6 +132,9 @@ module.exports = class Webserver extends Module {
                                     result = err;
                                 }
                                 status = 400;
+                            } else if (err instanceof Error) {
+                                res.status(500);
+                                return res.end("<pre>" + err.toString() + ": <br> " + err.stack);
                             } else {
                                 if (err.status) {
                                     res.status(err.status);
