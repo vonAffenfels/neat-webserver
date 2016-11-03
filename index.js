@@ -18,6 +18,12 @@ module.exports = class Webserver extends Module {
 
     static defaultConfig() {
         return {
+            port: 13337,
+            maxBodySize: '10mb',
+            cookieParser: {
+                "domain": "",
+                "secret": "neat-secret"
+            },
             session: {
                 name: "neat",
                 secret: "neat-secret",
@@ -30,7 +36,9 @@ module.exports = class Webserver extends Module {
                 },
                 store: {
                     host: "localhost",
-                    port: 6379
+                    port: 6379,
+                    password: null,
+                    db: null
                 }
             }
         }
@@ -44,17 +52,6 @@ module.exports = class Webserver extends Module {
         return new Promise((resolve, reject) => {
             this.log.debug("Initializing...");
 
-            if (!this.config.port) {
-                this.config.port = 13337;
-            }
-
-            if (!this.config.cookieParser) {
-                this.config.cookieParser = {
-                    "domain": "",
-                    "secret": "neat-secret"
-                };
-            }
-
             var storeConfig = this.config.session.store;
             var redisStore = connectRedis(session);
 
@@ -67,9 +64,12 @@ module.exports = class Webserver extends Module {
             this.webserver.use(compression());
             this.webserver.use(responseTime());
             this.webserver.use(bodyParser.urlencoded({
-                extended: false
+                extended: false,
+                limit: this.config.maxBodySize
             }));
-            this.webserver.use(bodyParser.json());
+            this.webserver.use(bodyParser.json({
+                limit: this.config.maxBodySize
+            }));
             this.webserver.use(methodOverride());
             this.webserver.use(cookieParser(this.config.cookieParser.secret));
             if (this.config.session.enabled) {
@@ -115,11 +115,6 @@ module.exports = class Webserver extends Module {
                     switch (typeof err) {
                         case "object":
 
-                            if (err instanceof Error) {
-                                res.status(500);
-                                return res.end("<pre>" + err.toString() + ": <br> " + err.stack);
-                            }
-
                             // mongoose style error
                             if (err.name) {
                                 if (err.name === "ValidationError") {
@@ -133,6 +128,9 @@ module.exports = class Webserver extends Module {
                                     result = err;
                                 }
                                 status = 400;
+                            } else if (err instanceof Error) {
+                                res.status(500);
+                                return res.end("<pre>" + err.toString() + ": <br> " + err.stack);
                             } else {
                                 if (err.status) {
                                     res.status(err.status);
@@ -289,7 +287,7 @@ module.exports = class Webserver extends Module {
 
             apeStatus.info("port", this.config.port);
             this.httpServer = this.webserver.listen(this.config.port, () => {
-                this.log.debug("Webserver listening on " + this.config.port);
+                this.log.info("Webserver listening on " + this.config.port);
                 this.listening = true;
                 resolve(this);
             });
