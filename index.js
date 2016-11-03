@@ -21,6 +21,7 @@ module.exports = class Webserver extends Module {
             session: {
                 name: "neat",
                 secret: "neat-secret",
+                enabled: true,
                 resave: true,
                 saveUninitialized: true,
                 cookie: {
