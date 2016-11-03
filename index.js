@@ -38,7 +38,7 @@ module.exports = class Webserver extends Module {
                     host: "localhost",
                     port: 6379,
                     password: null,
-                    db: null
+                    db: 0
                 }
             }
         }
