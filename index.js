@@ -148,6 +148,7 @@ module.exports = class Webserver extends Module {
                                     res.status(404);
                                     return res.end();
                                 default:
+                                    result = err;
                                     break;
                             }
                         default:
