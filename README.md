@@ -1,7 +1,12 @@
 # neat-webserver
 
-## Configuration
+## Installation
+```
+npm install neat-webserver --save
+```
 
+
+## Configuration
 ```
 {
     port: 13337,                    // port on which to run the app
@@ -37,19 +42,17 @@
 Application.registerModule("webserver", require("neat-webserver"));
 ```
 
-###### In any other Module
-
-Add a Route
+###### In any module
+Add a route
 ```
-    Application.modules.webserver.addRoute("get" || "post", "/url/for/route/.*?-:id.html", (req, res) => {
-        res.end("Hello World");
-    });
+Application.modules.webserver.addRoute("get" || "post", "/url/for/route/.*?-:id.html", (req, res) => {
+    res.end("Hello World");
+});
 ```
-
-Add Middleware
+Add middleware
 ```
-    Application.modules.webserver.addMiddleware("/path" || null, (req, res, next) => {
-        req.test = true;
-        next();    
-    });
+Application.modules.webserver.addMiddleware("/path" || null, (req, res, next) => {
+    req.test = true;
+    next();    
+});
 ```
