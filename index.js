@@ -55,6 +55,10 @@ module.exports = class Webserver extends Module {
             var storeConfig = this.config.session.store;
             var redisStore = connectRedis(session);
 
+            storeConfig.retry_strategy = function (options) {
+                return 1000;
+            };
+
             this.config.session.store = new redisStore(storeConfig);
 
             this.webserver = express();
