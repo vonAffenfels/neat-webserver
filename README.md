@@ -31,7 +31,10 @@ npm install neat-webserver --save
             password: null,         // redis password
             db: 0                   // redis db
         }
-    }
+    },
+    cors: [                         // array of domains where you would like to accept CORS ajax requests from
+        "www.google.de"
+    ]
 }
 ```
 
