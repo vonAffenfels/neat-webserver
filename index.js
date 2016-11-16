@@ -35,6 +35,10 @@ module.exports = class Webserver extends Module {
                     secure: false
                 },
                 store: {
+                    connect_timeout: 1000,
+                    retry_max_delay: 1000,
+                    prefix: "neat-session_",
+                    retry_unfulfilled_commands: true,
                     host: "localhost",
                     port: 6379,
                     password: null,
@@ -54,11 +58,12 @@ module.exports = class Webserver extends Module {
 
             var storeConfig = this.config.session.store;
             var redisStore = connectRedis(session);
+            var self = this;
 
             storeConfig.retry_strategy = function (options) {
+                self.log.debug("Reconnecting to session redis in 1 second");
                 return 1000;
             };
-
             this.config.session.store = new redisStore(storeConfig);
 
             this.webserver = express();
@@ -78,6 +83,12 @@ module.exports = class Webserver extends Module {
             this.webserver.use(cookieParser(this.config.cookieParser.secret));
             if (this.config.session.enabled) {
                 this.webserver.use(session(this.config.session));
+                this.webserver.use(function (req, res, next) {
+                    if (!req.session) {
+                        return next(new Error('Session is required but not available!'));
+                    }
+                    next();
+                });
             }
 
             if (this.config.cors) {
