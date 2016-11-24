@@ -60,6 +60,10 @@ module.exports = class Webserver extends Module {
             var redisStore = connectRedis(session);
             var self = this;
 
+            if (!storeConfig.password) {
+                delete storeConfig.password;
+            }
+
             storeConfig.retry_strategy = function (options) {
                 self.log.debug("Reconnecting to session redis in 1 second");
                 return 1000;
