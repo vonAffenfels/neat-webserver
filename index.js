@@ -11,6 +11,7 @@ var session = require('express-session');
 var connectRedis = require('connect-redis');
 var apeStatus = require('ape-status');
 var cors = require('cors');
+var fs = require('fs');
 var ejs = require('ejs');
 var Promise = require("bluebird");
 
@@ -86,7 +87,8 @@ module.exports = class Webserver extends Module {
             this.webserver.use(methodOverride());
             this.webserver.use(cookieParser(this.config.cookieParser.secret));
             if (this.config.session.enabled) {
-                this.webserver.use(session(this.config.session));
+                this.sessionMiddleware = session(this.config.session);
+                this.webserver.use(this.sessionMiddleware);
                 this.webserver.use(function (req, res, next) {
                     if (!req.session) {
                         return next(new Error('Session is required but not available!'));
