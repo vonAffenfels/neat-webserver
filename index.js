@@ -36,7 +36,7 @@ module.exports = class Webserver extends Module {
                     secure: false
                 },
                 store: {
-                    connect_timeout: 1000,
+                    connect_timeout: 10000,
                     retry_max_delay: 1000,
                     prefix: "neat-session_",
                     retry_unfulfilled_commands: true,
