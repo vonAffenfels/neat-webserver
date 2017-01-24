@@ -62,7 +62,7 @@ module.exports = class Webserver extends Module {
             var self = this;
 
             if (this.config.enablePM2SessionPortFix && process.env.NODE_APP_INSTANCE) {
-                this.config.port = parseInt(this.config.port) + process.env.NODE_APP_INSTANCE;
+                this.config.port = parseInt(this.config.port) + parseInt(process.env.NODE_APP_INSTANCE);
             }
 
             if (!storeConfig.password) {
