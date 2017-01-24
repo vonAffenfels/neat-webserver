@@ -61,6 +61,10 @@ module.exports = class Webserver extends Module {
             var redisStore = connectRedis(session);
             var self = this;
 
+            if (this.config.enablePM2SessionPortFix && process.env.NODE_APP_INSTANCE) {
+                this.config.port = parseInt(this.config.port) + process.env.NODE_APP_INSTANCE;
+            }
+
             if (!storeConfig.password) {
                 delete storeConfig.password;
             }
