@@ -37,8 +37,6 @@ module.exports = class Webserver extends Module {
                     secure: false
                 },
                 store: {
-                    connect_timeout: 10000,
-                    retry_max_delay: 1000,
                     prefix: "neat-session_",
                     retry_unfulfilled_commands: true,
                     host: "localhost",
@@ -59,6 +57,7 @@ module.exports = class Webserver extends Module {
             this.log.debug("Initializing...");
 
             var storeConfig = this.config.session.store;
+            delete storeConfig.connect_timeout // IMPORTANT, if this is set we will only retry x times...
             var redisStore = connectRedis(session);
             var self = this;
 
@@ -76,8 +75,11 @@ module.exports = class Webserver extends Module {
             };
             this.config.session.store = new redisStore(storeConfig);
 
+            apeStatus.redis(this.config.session.store.client, "session");
+
             this.webserver = express();
             this.webserver.set('trust proxy', 1);
+            this.webserver.use(apeStatus.express);
             this.webserver.engine('html', ejs.renderFile);
 
             this.webserver.use(compression());
@@ -130,7 +132,6 @@ module.exports = class Webserver extends Module {
             }
 
             this.webserver.use(cors(corsOptions));
-            this.webserver.use(apeStatus.express);
 
             this.webserver.use((req, res, next) => {
                 res.err = (err, status) => {
