@@ -144,7 +144,7 @@ module.exports = class Webserver extends Module {
                             // mongoose style error
                             if (err.name) {
                                 if (err.name === "ValidationError") {
-                                    result = Tools.formatMongooseError(err);
+                                    result = Tools.formatMongooseError(err, req.__);
                                 } else {
                                     result = err;
                                 }
