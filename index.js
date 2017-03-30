@@ -1,19 +1,20 @@
 "use strict";
 
-var Module = require("neat-base").Module;
-var express = require("express");
-var compression = require("compression");
-var responseTime = require('response-time');
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
-var connectRedis = require('connect-redis');
-var apeStatus = require('ape-status');
-var cors = require('cors');
-var fs = require('fs');
-var ejs = require('ejs');
-var Promise = require("bluebird");
+const Module = require("neat-base").Module;
+const Tools = require("neat-base").Tools;
+const express = require("express");
+const compression = require("compression");
+const responseTime = require('response-time');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const connectRedis = require('connect-redis');
+const apeStatus = require('ape-status');
+const cors = require('cors');
+const fs = require('fs');
+const ejs = require('ejs');
+const Promise = require("bluebird");
 
 module.exports = class Webserver extends Module {
 
@@ -135,7 +136,7 @@ module.exports = class Webserver extends Module {
                 res.err = (err, status) => {
                     status = status || 500;
 
-                    var result = {};
+                    let result = {};
 
                     switch (typeof err) {
                         case "object":
@@ -143,12 +144,7 @@ module.exports = class Webserver extends Module {
                             // mongoose style error
                             if (err.name) {
                                 if (err.name === "ValidationError") {
-                                    var formattedError = {};
-                                    for (var field in err.errors) {
-                                        formattedError[field] = err.errors[field].message;
-                                    }
-
-                                    result = formattedError;
+                                    result = Tools.formatMongooseError(err);
                                 } else {
                                     result = err;
                                 }
