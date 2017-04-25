@@ -143,12 +143,8 @@ module.exports = class Webserver extends Module {
                         case "object":
 
                             // mongoose style error
-                            if (err.name) {
-                                if (err.name === "ValidationError") {
-                                    result = Tools.formatMongooseError(err, req.__);
-                                } else {
-                                    result = err;
-                                }
+                            if (err.name && err.name === "ValidationError") {
+                                result = Tools.formatMongooseError(err, req.__);
                                 status = 400;
                             } else if (err instanceof Error) {
                                 res.status(500);
