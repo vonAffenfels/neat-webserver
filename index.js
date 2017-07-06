@@ -61,8 +61,9 @@ module.exports = class Webserver extends Module {
             var redisStore = connectRedis(session);
             var self = this;
 
+            this.listenPort = this.config.port;
             if (this.config.enablePM2SessionPortFix && process.env.NODE_APP_INSTANCE) {
-                this.config.port = parseInt(this.config.port) + parseInt(process.env.NODE_APP_INSTANCE);
+                this.listenPort = parseInt(this.config.port) + parseInt(process.env.NODE_APP_INSTANCE);
             }
 
             if (!storeConfig.password) {
@@ -304,9 +305,9 @@ module.exports = class Webserver extends Module {
             this.initMiddlewares();
             this.initRoutes();
 
-            apeStatus.info("port", this.config.port);
-            this.httpServer = this.webserver.listen(this.config.port, () => {
-                this.log.info("Webserver listening on " + this.config.port);
+            apeStatus.info("port", this.listenPort);
+            this.httpServer = this.webserver.listen(this.listenPort, () => {
+                this.log.info("Webserver listening on " + this.listenPort);
                 this.listening = true;
                 resolve(this);
             });
