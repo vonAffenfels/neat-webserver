@@ -120,13 +120,15 @@ module.exports = class Webserver extends Module {
                         'Accept',
                         'Content-Type',
                         'Authorization',
-                        'Content-Length'
+                        'Content-Length',
+                        'neat-auth'
                     ],
                     exposedHeaders: [
                         'Set-Cookie',
                         'X-Response-Time'
                     ],
                     origin: (origin, callback) => {
+                        console.log(this.config.cors);
                         return callback(null, this.config.cors.indexOf(origin) !== -1);
                     }
                 };
