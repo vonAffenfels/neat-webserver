@@ -128,7 +128,6 @@ module.exports = class Webserver extends Module {
                         'X-Response-Time'
                     ],
                     origin: (origin, callback) => {
-                        console.log(this.config.cors);
                         return callback(null, this.config.cors.indexOf(origin) !== -1);
                     }
                 };
