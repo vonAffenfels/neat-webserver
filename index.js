@@ -101,6 +101,13 @@ module.exports = class Webserver extends Module {
                     if (!req.session) {
                         return next(new Error('Session is required but not available!'));
                     }
+
+                    if (req.session.passport) {
+                        // DEBUG
+                        console.log(`${JSON.stringify(req.session, null, 4)}`);
+
+                    }
+
                     next();
                 });
             }
