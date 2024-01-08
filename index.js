@@ -122,7 +122,8 @@ module.exports = class Webserver extends Module {
                         'Content-Type',
                         'Authorization',
                         'Content-Length',
-                        'neat-auth'
+                        'neat-auth',
+                        'sentry-trace'
                     ],
                     exposedHeaders: [
                         'Set-Cookie',
