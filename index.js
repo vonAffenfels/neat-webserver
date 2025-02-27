@@ -9,7 +9,8 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const connectRedis = require('connect-redis');
+const {RedisStore} = require('connect-redis');
+const {createClient} = require('redis');
 const apeStatus = require('ape-status');
 const cors = require('cors');
 const fs = require('fs');
@@ -24,7 +25,7 @@ module.exports = class Webserver extends Module {
             maxBodySize: '10mb',
             cookieParser: {
                 "domain": "",
-                "secret": "neat-secret"
+                "secret": "neat-secret",
             },
             session: {
                 name: "neat",
@@ -34,7 +35,7 @@ module.exports = class Webserver extends Module {
                 saveUninitialized: true,
                 cookie: {
                     domain: "",
-                    secure: false
+                    secure: false,
                 },
                 store: {
                     prefix: "neat-session_",
@@ -42,10 +43,10 @@ module.exports = class Webserver extends Module {
                     host: "localhost",
                     port: 6379,
                     password: null,
-                    db: 0
-                }
-            }
-        }
+                    db: 0,
+                },
+            },
+        };
     }
 
     init() {
@@ -53,12 +54,33 @@ module.exports = class Webserver extends Module {
         this.middlewares = [];
         this.listening = false;
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             this.log.debug("Initializing...");
 
             var storeConfig = this.config.session.store;
-            delete storeConfig.connect_timeout // IMPORTANT, if this is set we will only retry x times...
-            var redisStore = connectRedis(session);
+            delete storeConfig.connect_timeout; // IMPORTANT, if this is set we will only retry x times...
+            // var redisStore = connectRedis(session);
+            let options = {
+                socket: {
+                    host: storeConfig.host,
+                    // retry_strategy: function (options) {
+                    //     self.log.debug("Reconnecting to session redis in 1 second");
+                    //     return 1000;
+                    // },
+                    port: storeConfig.port,
+                },
+                password: storeConfig.password,
+                database: storeConfig.db || 0,
+            };
+
+            const redisClient = createClient(options);
+            await redisClient.connect().catch(this.log.error);
+
+            const redisStore = new RedisStore({
+                client: redisClient,
+                prefix: storeConfig.prefix,
+            });
+
             var self = this;
 
             this.listenPort = this.config.port;
@@ -74,7 +96,7 @@ module.exports = class Webserver extends Module {
                 self.log.debug("Reconnecting to session redis in 1 second");
                 return 1000;
             };
-            this.config.session.store = new redisStore(storeConfig);
+            this.config.session.store = redisStore;
 
             apeStatus.redis(this.config.session.store.client, "session");
 
@@ -87,10 +109,10 @@ module.exports = class Webserver extends Module {
             this.webserver.use(responseTime());
             this.webserver.use(bodyParser.urlencoded({
                 extended: false,
-                limit: this.config.maxBodySize
+                limit: this.config.maxBodySize,
             }));
             this.webserver.use(bodyParser.json({
-                limit: this.config.maxBodySize
+                limit: this.config.maxBodySize,
             }));
             this.webserver.use(methodOverride());
             this.webserver.use(cookieParser(this.config.cookieParser.secret));
@@ -112,7 +134,7 @@ module.exports = class Webserver extends Module {
                     methods: [
                         'GET',
                         'POST',
-                        'OPTIONS'
+                        'OPTIONS',
                     ],
                     allowedHeaders: [
                         'Cookie',
@@ -123,15 +145,15 @@ module.exports = class Webserver extends Module {
                         'Authorization',
                         'Content-Length',
                         'neat-auth',
-                        'sentry-trace'
+                        'sentry-trace',
                     ],
                     exposedHeaders: [
                         'Set-Cookie',
-                        'X-Response-Time'
+                        'X-Response-Time',
                     ],
                     origin: (origin, callback) => {
                         return callback(null, this.config.cors.indexOf(origin) !== -1);
-                    }
+                    },
                 };
             }
 
@@ -181,7 +203,7 @@ module.exports = class Webserver extends Module {
                     this.log.debug(result);
                     res.status(status);
                     return res.json(result);
-                }
+                };
 
                 return next();
             });
@@ -200,7 +222,7 @@ module.exports = class Webserver extends Module {
         this.middlewares.push({
             func: func,
             path: path,
-            sort: sort !== undefined ? sort : this.middlewares.length
+            sort: sort !== undefined ? sort : this.middlewares.length,
         });
     }
 
@@ -267,7 +289,7 @@ module.exports = class Webserver extends Module {
             method: method,
             path: path,
             funcs: funcs,
-            sort: sort !== undefined ? sort : this.routes.length
+            sort: sort !== undefined ? sort : this.routes.length,
         });
     }
 
@@ -325,4 +347,4 @@ module.exports = class Webserver extends Module {
         });
     }
 
-}
+};
