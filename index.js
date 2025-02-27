@@ -74,6 +74,18 @@ module.exports = class Webserver extends Module {
             };
 
             const redisClient = createClient(options);
+
+            //Add error handlers before the connect. only then does the reconnect work properly
+            redisClient.on("error", (err) => {
+                this.log.warn(err);
+            });
+
+            redisClient.on("connect", () => {
+                this.log.info("Redis Connected");
+            });
+            redisClient.on('reconnecting', () => this.log.info('client is reconnecting'));
+            redisClient.on('ready', () => this.log.info('client is ready'));
+
             await redisClient.connect().catch(this.log.error);
 
             const redisStore = new RedisStore({
