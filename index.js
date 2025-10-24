@@ -91,6 +91,7 @@ module.exports = class Webserver extends Module {
             const redisStore = new RedisStore({
                 client: redisClient,
                 prefix: storeConfig.prefix,
+                ttl: storeConfig.ttl,
             });
 
             var self = this;
